@@ -89,10 +89,9 @@ class Salon:
     def __init__(self, stylists: list[Stylist]):
         self.stylists = stylists
         self.waiting_customers = []
-        self.clock = Clock(
-            on_customer_arrival=self.customer_entered,
-            check_stylist_progress=self.check_stylist_progress,
-        )
+        self.clock = Clock()
+        self.is_open = False
+        self.closing_time = (17, 0)
 
     def open(self):
         """
@@ -101,7 +100,38 @@ class Salon:
         This starts the clock tracking time for a workday.
         """
         self.log_event("Hair salon opened")
-        self.clock.start()
+        self.is_open = True
+        self.clock.start(
+            [
+                self.check_closing_time,
+                self.check_for_customers,
+                self.check_stylist_progress,
+            ]
+        )
+
+    def check_closing_time(self):
+        """
+        Checks if it's time to close doors.
+        """
+        if self.clock.time >= self.closing_time:
+            self.is_open = False
+            self.clock.active = False
+
+    def check_for_customers(self):
+        """
+        Checks if a customer has arrived
+        """
+        if self.is_open and self.customer_arrived():
+            self.customer_entered(Customer.create())
+
+    def customer_arrived(self) -> bool:
+        """
+        Returns whether or not a customer has arrived.
+
+        A customer arrives every 7 minutes.
+        """
+        customer_arrival_time = 7
+        return self.clock.mins % customer_arrival_time == 0
 
     def log_event(self, msg: str):
         """
@@ -174,53 +204,27 @@ class Clock:
 
     To simulate a 9 to 5 eight hour shift, this clock uses one second to simulate one hour.
 
-    The clock receives three callbacks to interact with its salon:
-    - on_customer_arrival: notifies the salon of a new customer
-    - check_stylist_progress: alerts the salon to check a stylist' status
+    Once the clock is started, it will emit a notification every (simulated) minute to any
+    registered listeners; this allows the listeners to act on a time-specific event.
     """
 
-    def __init__(
-        self,
-        on_customer_arrival: callable,
-        check_stylist_progress: callable,
-    ):
-        self.hour = 9
-        self.mins = 0
-        self.on_customer_arrival = on_customer_arrival
-        self.check_stylist_progress = check_stylist_progress
+    def __init__(self):
+        self.hour, self.mins = (9, 0)
+        self.active = False
 
-    def start(self):
+    def start(self, listeners: list[callable]):
         """
         Starts the salon clock.
 
-        The clock will run from 9 am to 5 pm.
-        """
-        while not self.is_closing_time():
-            self.wait_one_minute()  # one tick of the clock simulates a minute
-            self.check_for_customers()  # after every minute, we check for new customers
-            self.check_stylist_progress()  # and then check the current haircuts in progres
+        Oncer started, the clock will run until explicitly stopped by a calling client.
 
-    def check_for_customers(self):
+        All supplied listeners are notified every minute.
         """
-        Checks if a customer has arrived
-        """
-        if not self.is_closing_time() and self.customer_arrived():
-            self.on_customer_arrival(Customer.create())
-
-    def customer_arrived(self) -> bool:
-        """
-        Returns whether or not a customer has arrived.
-
-        A customer arrives every 7 minutes.
-        """
-        customer_arrival_time = 7
-        return self.mins % customer_arrival_time == 0
-
-    def is_closing_time(self) -> bool:
-        """
-        Determines whether or not is time to close the salon.
-        """
-        return self.hour >= 17
+        self.active = True
+        while self.active:
+            self.wait_one_minute()
+            for time_listener in listeners:
+                time_listener()
 
     def wait_one_minute(self):
         """
@@ -234,6 +238,13 @@ class Clock:
         if self.mins >= 60:
             self.hour += 1
             self.mins = 0
+
+    @property
+    def time(self) -> tuple[int, int]:
+        """
+        The current clock time as a tuple
+        """
+        return (self.hour, self.mins)
 
     def current_time(self):
         """
