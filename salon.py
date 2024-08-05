@@ -105,7 +105,7 @@ class Salon:
             [
                 self.check_closing_time,
                 self.check_for_customers,
-                self.check_stylist_progress,
+                self.update_stylist_progress,
             ]
         )
 
@@ -177,9 +177,11 @@ class Salon:
         free = [s for s in self.stylists if s.available]
         return free[0] if free else None
 
-    def check_stylist_progress(self):
+    def update_stylist_progress(self):
         """
         Checks the status of all stylists currently performing haircuts.
+
+        When the stylist finishes the current haircut, it is assigned a new customer.
         """
         busy = [s for s in self.stylists if not s.available]
         for stylist in busy:
@@ -187,8 +189,8 @@ class Salon:
                 self.log_event(f"{stylist} ended cutting {stylist.customer}'s hair")
                 self.log_event(f"{stylist.customer} left {stylist.customer.mood}")
                 self.assign_next_customer_to(stylist)
-            else:
-                stylist.cut_hair()
+
+            stylist.cut_hair()
 
     def haircut_in_progress(self) -> bool:
         """

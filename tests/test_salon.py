@@ -174,4 +174,25 @@ def test_assign_next_customer_customer_waiting_salon_closed():
     salon.waiting_customers.append(customer)
     assert ann.customer == None
     salon.assign_next_customer_to(ann)
-    assert ann.customer == None    
+    assert ann.customer == None
+
+
+def test_update_stylist_progress_with_haircut_in_progress():
+    ann = Stylist("Ann")
+    ann.assign(Customer("Joe"))
+    salon = Salon([ann])
+    salon.is_open = True
+    assert ann.minutes == 30
+    salon.update_stylist_progress()
+    assert ann.minutes == 29
+
+
+def test_update_stylist_progress_on_new_assignment():
+    ann = Stylist("Ann")
+    ann.assign(Customer("Joe"))
+    salon = Salon([ann])
+    salon.is_open = True
+    salon.waiting_customers.append(Customer("Frank"))
+    ann.minutes = 0
+    salon.update_stylist_progress()
+    assert ann.minutes == 29
