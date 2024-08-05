@@ -115,7 +115,9 @@ class Salon:
         """
         if self.clock.time >= self.closing_time:
             self.is_open = False
-            self.clock.active = False
+            if not self.haircut_in_progress():
+                # only stop the store's clock after all current customers are done
+                self.clock.active = False
 
     def check_for_customers(self):
         """
@@ -158,6 +160,11 @@ class Salon:
         """
         Assigns the customer to a stylist, effectively starting the customer's haircut.
         """
+        if not self.is_open:
+            # Salon is now closed, stylist done for the day
+            stylist.customer = None
+            return
+
         if self.waiting_customers:
             customer = self.waiting_customers.pop(0)
             stylist.assign(customer)

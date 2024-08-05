@@ -104,6 +104,21 @@ def test_check_closing_time_after_closing_time():
     assert salon.clock.active == False
 
 
+def test_check_closing_time_after_closing_time_haircuts_in_progress():
+    stylist = Stylist("Ben")
+    stylist.assign(Customer("Joe"))
+    salon = Salon([stylist])
+    salon.clock.start = lambda _: []
+    salon.clock.active = True
+    salon.open()
+    salon.clock.hour, salon.clock.mins = 17, 0
+    assert salon.is_open == True
+    assert salon.clock.active == True
+    salon.check_closing_time()
+    assert salon.is_open == False
+    assert salon.clock.active == True
+
+
 def test_check_for_customers_with_salon_open_no_customers_yet():
     salon = Salon([])
     salon.is_open = True
@@ -129,3 +144,34 @@ def test_check_for_customers_with_salon_closed_customer_arrived():
     assert not salon.waiting_customers
     salon.check_for_customers()
     assert not salon.waiting_customers
+
+
+def test_assign_next_customer_no_customers_waiting():
+    ann = Stylist("Ann")
+    salon = Salon([ann])
+    salon.is_open = True
+    assert ann.customer == None
+    salon.assign_next_customer_to(ann)
+    assert ann.customer == None
+
+
+def test_assign_next_customer_customer_waiting():
+    ann = Stylist("Ann")
+    customer = Customer("Joe")
+    salon = Salon([ann])
+    salon.is_open = True
+    salon.waiting_customers.append(customer)
+    assert ann.customer == None
+    salon.assign_next_customer_to(ann)
+    assert ann.customer == customer
+
+
+def test_assign_next_customer_customer_waiting_salon_closed():
+    ann = Stylist("Ann")
+    customer = Customer("Joe")
+    salon = Salon([ann])
+    salon.is_open = False
+    salon.waiting_customers.append(customer)
+    assert ann.customer == None
+    salon.assign_next_customer_to(ann)
+    assert ann.customer == None    
