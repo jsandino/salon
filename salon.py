@@ -4,6 +4,7 @@ Hair Salon simulation.
 
 from dataclasses import dataclass
 import time
+from typing import Self
 
 
 @dataclass
@@ -17,15 +18,15 @@ class Customer:
     cid: int = 0
 
     @classmethod
-    def create(cls):
+    def create(cls) -> Self:
         """
-        Factory method to create customers with an auto-generated name
+        Factory method to create customers with an auto-generated name.
         """
         cls.cid += 1
         return Customer(f"Customer-{cls.cid}")
 
     @property
-    def mood(self):
+    def mood(self) -> str:
         """
         Sepecifies a customer' sentiment towards the salon.
         """
@@ -57,7 +58,7 @@ class Stylist:
         self.customer = customer
 
     @property
-    def available(self):
+    def available(self) -> bool:
         """
         Indicates whether or not this stylist can take a customer.
         """
@@ -65,7 +66,7 @@ class Stylist:
 
     def cut_hair(self):
         """
-        Tells the stylist to continue with the hair cut, until the haircut is done.
+        Tells the stylist to continue with the haircut, until the haircut is done.
         """
         self.minutes -= 1
         if self.is_done():
@@ -77,13 +78,13 @@ class Stylist:
         """
         return self.minutes == 0
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
 class Salon:
     """
-    Haircut Salon representation, keeping track of all stylists currently on-shift.
+    Hair Salon representation, keeping track of all stylists currently on-shift.
     """
 
     def __init__(self, stylists: list[Stylist]):
@@ -121,7 +122,7 @@ class Salon:
 
     def check_for_customers(self):
         """
-        Checks if a customer has arrived
+        Checks if a customer has arrived.
         """
         if self.is_open and self.customer_arrived():
             self.customer_entered(Customer.create())
@@ -138,14 +139,14 @@ class Salon:
     def log_event(self, msg: str):
         """
         Prints interesting events happening at the salon,
-        prefixed with the current times in HH:MM format.
+        prefixed with the current time in HH:MM format.
         """
         curtime = self.clock.current_time()
         print(f"{curtime} {msg}")
 
     def customer_entered(self, customer: Customer):
         """
-        Recevies an incoming customer.
+        Welcome an incoming customer.
 
         The customer is added to a waiting queue, until a stylist
         becomes available.
@@ -181,7 +182,7 @@ class Salon:
         """
         Checks the status of all stylists currently performing haircuts.
 
-        When the stylist finishes the current haircut, it is assigned a new customer.
+        When a stylist finishes the current haircut, it is assigned a new customer.
         """
         busy = [s for s in self.stylists if not s.available]
         for stylist in busy:
@@ -225,7 +226,7 @@ class Clock:
         """
         Starts the salon clock.
 
-        Oncer started, the clock will run until explicitly stopped by a calling client.
+        Once started, the clock will run until explicitly stopped by a calling client.
 
         All supplied listeners are notified every minute.
         """
@@ -237,7 +238,7 @@ class Clock:
 
     def wait_one_minute(self):
         """
-        Simulates passage of time: every second simulates 60 minutes.
+        Simulates the passage of time: every second simulates 60 minutes.
 
         The clock's hour and minute attributes are updated to reflect the minute
         that just elapsed.
@@ -251,7 +252,7 @@ class Clock:
     @property
     def time(self) -> tuple[int, int]:
         """
-        The current clock time as a tuple
+        The current clock time as a tuple.
         """
         return (self.hour, self.mins)
 
@@ -269,7 +270,7 @@ def main():
     A salon is created with its 4 stylists; it is then opened for business and,
     at the end of the day, any waiting customers are kicked-out.
     """
-    salon = Salon([Stylist("Ann"), Stylist("Ben"), Stylist("Carol"), Stylist("Derek")])
+    salon = Salon([Stylist("Anne"), Stylist("Ben"), Stylist("Carol"), Stylist("Derek")])
     salon.open()
     salon.kick_out_customers()
 
