@@ -35,7 +35,7 @@ def test_cusomer_creation_generates_name():
 # Clock
 
 
-def test_clock_simulates_60_minutes_every_second():
+def test_clock_notifies_callback_every_virtual_minute():
     clock = Clock()
     assert (9, 0) == (clock.hour, clock.mins)
 

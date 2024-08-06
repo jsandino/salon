@@ -212,7 +212,8 @@ class Clock:
     """
     An abstraction representing the passage of time while the salon is opened.
 
-    To simulate a 9 to 5 eight hour shift, this clock uses one second to simulate one hour.
+    To simulate a 9 to 5 eight hour shift, this clock uses a millisecond to
+    simulate one minute.
 
     Once the clock is started, it will emit a notification every (simulated) minute to any
     registered listeners; this allows the listeners to act on a time-specific event.
@@ -238,12 +239,14 @@ class Clock:
 
     def wait_one_minute(self):
         """
-        Simulates the passage of time: every second simulates 60 minutes.
+        Simulates the passage of time.
+        
+        Every second simulates 1000 minutes (~ 16.7 hours per second).
 
         The clock's hour and minute attributes are updated to reflect the minute
         that just elapsed.
         """
-        time.sleep(1 / 60)
+        time.sleep(1 / 1000)
         self.mins += 1
         if self.mins >= 60:
             self.hour += 1

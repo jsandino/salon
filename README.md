@@ -51,9 +51,7 @@ All the logic necessary to simulate the hair salon is defined in 4 classes:
 ![Salon class diagram](images/model.png)
 
 ### Clock
-An abstraction representing the passage of time during the Salon's business hours.  It allows to simulate an entire work day by using one
-second to represent a "virtual" hour.  Thus, every 60th of a second,
-a "minute" goes by at the salon.
+An abstraction representing the passage of time during the Salon's business hours.  It allows to simulate an entire work day by using one millisecond to represent a "virtual" minute.  Thus, every 1000th of a second, a "minute" goes by at the salon.
 
 When started, a Clock instance receives a list of listener callbacks: every "virtual minute", the clock notifies to all its register listeners, so that they can perform any time sensitive actions.  
 
